@@ -98,9 +98,10 @@ if menu == "📆 Réserver un terrain":
     date_planning = st.date_input("Voir le planning du :", datetime.today(), key="planning_date")
     
     query = """
-        SELECT r.terrain, r.heure, (m.prenom || ' ' || m.nom) as joueur 
-        FROM reservations r 
-        JOIN membres m ON r.membre_id = m.id 
+        SELECT r.terrain, r.heure,
+               (m.prenom || ' ' || m.nom || CASE WHEN m.email IN ('votre_lionel.heureux@icloud.com', 'autre_severine.golinveau@totalenergies.com') THEN ' (Admin)' ELSE '' END) as joueur
+        FROM reservations r
+        JOIN membres m ON r.member_id = m.id
         WHERE r.date = ?
     """
     res_df = pd.read_sql_query(query, conn, params=(str(date_planning),))
