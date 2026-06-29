@@ -1,10 +1,6 @@
 import streamlit as st
 
 # Vérification du mot de passe admin
-password = st.sidebar.text_input("Mot de passe Admin", type="password")
-if password == "TCM2026": # Vous pourrez choisir le mot de passe que vous voulez ici
-    st.sidebar.success("Mode Administrateur Activé")
-    # Tout votre code de l'espace administration actuel se range ici...import streamlit as st
 import sqlite3
 import pandas as pd
 from datetime import datetime, time
