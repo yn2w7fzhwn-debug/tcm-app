@@ -155,15 +155,32 @@ elif menu == "👤 Espace Administration":
     with tab2:
         if est_admin:
             st.subheader("Membres inscrits au TCM (Vue Administrateur)")
-            # L'admin voit tout, y compris l'email
             membres_complets = pd.read_sql_query("SELECT id, prenom, nom, email FROM membres", conn)
             if membres_complets.empty:
                 st.info("Aucun membre inscrit pour le moment.")
             else:
+                # On affiche l'ID pour que l'admin sache quel numéro supprimer
                 st.dataframe(membres_complets, use_container_width=True, hide_index=True)
+               
+                # --- ZONE DE SUPPRESSION POUR L'ADMIN ---
+                st.write("---")
+                st.subheader("🗑️ Supprimer un membre")
+                with st.form("suppression_membre"):
+                    id_a_supprimer = st.number_input("Entrez l'ID du membre à supprimer :", min_value=1, step=1)
+                    bouton_supprimer = st.form_submit_button("Supprimer définitivement", type="primary")
+                   
+                    if bouton_supprimer:
+                        # Vérifier si le membre existe
+                        verif = cursor.execute("SELECT prenom, nom FROM membres WHERE id = ?", (id_a_supprimer,)).fetchone()
+                        if verif:
+                            cursor.execute("DELETE FROM membres WHERE id = ?", (id_a_supprimer,))
+                            conn.commit()
+                            st.success(f"Le membre **{verif[0]} {verif[1]}** (ID: {id_a_supprimer}) a été supprimé.")
+                            st.rerun() # Recharge la page pour actualiser le tableau
+                        else:
+                            st.error("❌ Aucun membre ne possède cet ID.")
         else:
             st.subheader("Membres inscrits au TCM")
-            # Le membre classique ne voit PAS l'email (on ne la sélectionne pas dans la requête SQL)
             membres_publics = pd.read_sql_query("SELECT prenom, nom FROM membres", conn)
             if membres_publics.empty:
                 st.info("Aucun membre inscrit pour le moment.")
