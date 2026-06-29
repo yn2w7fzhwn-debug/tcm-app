@@ -95,7 +95,7 @@ if menu == "📆 Réserver un terrain":
     # Affichage du planning du jour
     st.write("---")
     st.subheader("📅 Planning des réservations")
-    date_planning = st.date_input("Voir le planning du :", datetime.today(), key="planning_date", format=DD/MM/YYYY")
+    date_planning = st.date_input("Voir le planning du :", datetime.today(), key="planning_date", format="DD/MM/YYYY")
     
     query = """
         SELECT r.terrain, r.heure,
