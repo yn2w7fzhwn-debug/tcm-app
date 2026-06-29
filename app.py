@@ -115,34 +115,57 @@ if menu == "📆 Réserver un terrain":
 # 👤 PAGE : ADMINISTRATION
 # ----------------------------------------------------
 elif menu == "👤 Espace Administration":
-    st.header("Gestion du club (Admin)")
-    
-    tab1, tab2 = st.tabs(["➕ Ajouter un membre", "📋 Liste des membres"])
-    
+    st.subheader("👤 Gestion du club & Membres")
+   
+    # Zone de connexion Admin optionnelle dans la page
+    mot_de_passe = st.sidebar.text_input("🔑 Mode Administrateur (Mot de passe) :", type="password")
+    est_admin = (mot_de_passe == "TCM2026!")
+
+    if est_admin:
+        st.success("🔓 Mode Administrateur Activé")
+        tab1, tab2 = st.tabs(["➕ Ajouter un membre", "📋 Liste des membres (Complet)"])
+    else:
+        st.info("💡 Mode Visiteur : Seuls les noms et prénoms sont visibles. Les administrateurs peuvent se connecter dans la barre latérale gauche pour voir les e-mails et ajouter des membres.")
+        tab1, tab2 = st.tabs(["🔒 Ajouter un membre (Admin)", "📋 Liste des membres"])
+
+    # --- ONGLET 1 : AJOUTER UN MEMBRE ---
     with tab1:
-        st.subheader("Enregistrer un nouveau membre")
-        with st.form("ajout_membre"):
-            nom = st.text_input("Nom")
-            prenom = st.text_input("Prénom")
-            email = st.text_input("Adresse Email")
-            
-            submit = st.form_submit_button("Ajouter le membre")
-            
-            if submit:
-                if nom and prenom and email:
-                    try:
-                        cursor.execute("INSERT INTO membres (nom, prenom, email) VALUES (?, ?, ?)", (nom, prenom, email))
-                        conn.commit()
-                        st.success(f"Le membre **{prenom} {nom}** a été ajouté avec succès !")
-                    except sqlite3.IntegrityError:
-                        st.error("❌ Cet email est déjà utilisé par un autre membre.")
-                else:
-                    st.warning("⚠️ Veuillez remplir tous les champs.")
-                    
-    with tab2:
-        st.subheader("Membres inscrits au TCM")
-        membres_complets = pd.read_sql_query("SELECT id, prenom, nom, email FROM membres", conn)
-        if membres_complets.empty:
-            st.info("Aucun membre inscrit pour le moment.")
+        if est_admin:
+            st.subheader("Enregistrer un nouveau membre")
+            with st.form("ajout_membre"):
+                nom = st.text_input("Nom")
+                prenom = st.text_input("Prénom")
+                email = st.text_input("Adresse Email")
+                submit = st.form_submit_button("Ajouter le membre")
+               
+                if submit:
+                    if nom and prenom and email:
+                        try:
+                            cursor.execute("INSERT INTO membres (nom, prenom, email) VALUES (?, ?, ?)", (nom, prenom, email))
+                            conn.commit()
+                            st.success(f"Le membre **{prenom} {nom}** a été ajouté avec succès !")
+                        except sqlite3.IntegrityError:
+                            st.error("❌ Cet email est déjà utilisé par un autre membre.")
+                    else:
+                        st.warning("⚠️ Veuillez remplir tous les champs.")
         else:
-            st.dataframe(membres_complets, use_container_width=True, hide_index=True)
+            st.warning("🔒 Vous devez être administrateur pour ajouter un membre. Veuillez saisir le mot de passe dans la barre latérale gauche.")
+
+    # --- ONGLET 2 : LISTE DES MEMBRES ---
+    with tab2:
+        if est_admin:
+            st.subheader("Membres inscrits au TCM (Vue Administrateur)")
+            # L'admin voit tout, y compris l'email
+            membres_complets = pd.read_sql_query("SELECT id, prenom, nom, email FROM membres", conn)
+            if membres_complets.empty:
+                st.info("Aucun membre inscrit pour le moment.")
+            else:
+                st.dataframe(membres_complets, use_container_width=True, hide_index=True)
+        else:
+            st.subheader("Membres inscrits au TCM")
+            # Le membre classique ne voit PAS l'email (on ne la sélectionne pas dans la requête SQL)
+            membres_publics = pd.read_sql_query("SELECT prenom, nom FROM membres", conn)
+            if membres_publics.empty:
+                st.info("Aucun membre inscrit pour le moment.")
+            else:
+                st.dataframe(membres_publics, use_container_width=True, hide_index=True)
