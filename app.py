@@ -68,7 +68,7 @@ if menu == "📆 Réserver un terrain":
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            date_choisie = st.date_input("Choisir une date", datetime.today())
+            # date_choisie = st.date_input("Choisir une date", datetime.today(), format="DD/MM/YYYY")
         with col2:
             terrain_choisi = st.selectbox("Choisir un terrain", TERRAINS)
         with col3:
