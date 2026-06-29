@@ -119,7 +119,7 @@ elif menu == "👤 Espace Administration":
    
     # Zone de connexion Admin optionnelle dans la page
     mot_de_passe = st.sidebar.text_input("🔑 Mode Administrateur (Mot de passe) :", type="password")
-    est_admin = (mot_de_passe == "TCM2026!")
+    est_admin = (mot_de_passe == "TCM2026")
 
     if est_admin:
         st.success("🔓 Mode Administrateur Activé")
